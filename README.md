@@ -5,10 +5,10 @@ La idea de este proyecto es hacer un ETL que obtenga los valores de acciones de 
 Para este se usa Docker con Spark para ejecutar el codigo con ayuda de la  librerìa 'pyspark' y los datos procesados llevarlo a una base de datos como Posgres. 
 Luego para la visualización, se usa Superset donde se pueden armar Dashboards o gráficos como se muestra a continuación:
 
-![pic](Superset.png
+![pic](./pic/Superset.png)
 
 
-# 2. Descripcion  
+# 2. Descripción  
 
 Este proyecto conformados por tres pates:
     a) Spark para las ejecuciones de código. Está conformado por un Master y un Worker 1
@@ -19,7 +19,7 @@ Este proyecto conformados por tres pates:
 
 En el siguiente gráfico se muestra la cofiguracióm
     
-![pic](Esquema.png)
+![pic](./pic/Esquema.png)
 
 
 # 3. Instalación:
