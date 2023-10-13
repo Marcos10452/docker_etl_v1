@@ -1,0 +1,86 @@
+# _____________ETL stocks 2023-10-05_______________
+
+version: "3"
+services:
+  master: 
+    # ## Spark_master ###########################################
+    container_name: master
+    # Following image was gotten from DockerHub (it was published first)
+    image: arjones/pyspark:2.4.5
+    restart: always
+    command: ["/opt/spark/sbin/start-master.sh"] # this is coming how the image was created with dockerfile
+    environment:
+      MASTER: spark://master:7077
+      SPARK_NO_DAEMONIZE: 1
+    # Select ports
+    ports:
+      - 4040:4040
+      - 6066:6066
+      - 7077:7077
+      - 8080:8080
+    # define volumes
+    # you define both the source and target paths, which represent the host and container paths, respectively.
+    volumes:
+      - ./code:/app
+      - ./dataset:/dataset
+      
+  ### Spark_worker1 ###########################################
+  worker1:
+    container_name: worker1
+    image: arjones/pyspark:2.4.5
+    restart: always
+    # Again, this is comming from image and how it was created.
+    command: ["/opt/spark/sbin/start-slave.sh", "spark://master:7077", "--memory", "512m", "--cores", "2"]
+    environment:
+      MASTER: spark://master:7077
+      SPARK_NO_DAEMONIZE: 1
+    depends_on:
+      - master
+    ports:
+      - 4041:4040
+      - "6066"
+      - "7077"
+      - 8081:8080
+    # define volumes. use folders inside project
+    volumes:
+      - ./code:/app
+      - ./dataset:/dataset
+
+  ### PostgreSQL ###########################################
+  postgres:
+    container_name: postgres
+    image: postgres:11
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data # To back up the data, we also mounted the /var/lib/postgresql/data directory to the /data directory of the host
+      - ./postgres/scripts:/docker-entrypoint-initdb.d  # folder as define entry point to init DB.
+    # define postgres db's name and user
+    environment:
+      POSTGRES_DB: etl
+      POSTGRES_USER: marcos
+      POSTGRES_PASSWORD: m0rc05
+    ports:
+      - "5432:5432"
+
+  ### Superset ###########################################
+  superset:
+    container_name: superset
+    image: amancevice/superset
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      MAPBOX_API_KEY: ${MAPBOX_API_KEY}
+      SUPERSET_HOME: /etc/superset
+    ports:
+      - "8088:8088"
+    volumes:
+    # folder as define entry point to init DB.
+      - ./superset/conf/superset_config.py:/etc/superset/superset_config.py
+      - superset:/var/lib/superset
+
+# ## Volumes ###########################################
+volumes:
+  postgres-data:
+  superset:
+
